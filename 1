@@ -1,0 +1,141 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+
+class DoThi {
+private:
+    int soDinh;
+    vector<vector<int>> danhSachKe;
+    vector<string> tenDinh;
+
+public:
+    DoThi(int soLuongDinh) {
+        soDinh = soLuongDinh;
+        danhSachKe.resize(soLuongDinh);
+        tenDinh.resize(soLuongDinh, "");
+    }
+
+    void themCanh(int dinhA, int dinhB) {
+        danhSachKe[dinhA].push_back(dinhB);
+        danhSachKe[dinhB].push_back(dinhA); 
+    }
+
+    void datTenDinh(int viTriDinh, string ten) {
+        tenDinh[viTriDinh] = ten;
+    }
+
+    void xoaCanh(int dinhA, int dinhB) {
+        for (auto conTro = danhSachKe[dinhA].begin(); conTro != danhSachKe[dinhA].end(); conTro++) {
+            if (*conTro == dinhB) {
+                danhSachKe[dinhA].erase(conTro);
+                break;
+            }
+        }
+
+        for (auto conTro = danhSachKe[dinhB].begin(); conTro != danhSachKe[dinhB].end(); conTro++) {
+            if (*conTro == dinhA) {
+                danhSachKe[dinhB].erase(conTro);
+                break;
+            }
+        }
+    }
+
+    void xoaDinh(int viTriDinh) {
+        for (int i = 0; i < soDinh; i++) {
+            if (i == viTriDinh) continue;
+
+            auto& dinhKe = danhSachKe[i];
+            for (auto conTro = dinhKe.begin(); conTro != dinhKe.end(); ) {
+                if (*conTro == viTriDinh) dinhKe.erase(conTro);
+                else conTro++;
+            }
+        }
+
+        danhSachKe[viTriDinh].clear();
+        tenDinh[viTriDinh] = "";
+    }
+
+    void hienThi() {
+        cout << "Danh sach lien ket bieu dien do thi vo huong: " << endl;
+        for (int i = 0; i < soDinh; i++) {
+            cout << "    ";
+            if (tenDinh[i] == "") continue;
+            cout << tenDinh[i] << " --> ";
+            for (auto dinhKe : danhSachKe[i]) {
+                cout << tenDinh[dinhKe] << ", ";
+            }
+            cout << endl;
+        }
+    }
+
+public:
+    vector<string> duyetRong(int dinhBatDau = 0) {
+        vector<bool> daTham(soDinh, false);
+        vector<string> ketQua;
+
+        queue<int> hangDoi;
+
+        daTham[dinhBatDau] = true;
+        hangDoi.push(dinhBatDau);
+
+        while (!hangDoi.empty()) {
+            int dinhHienTai = hangDoi.front();
+            hangDoi.pop();
+            ketQua.push_back(tenDinh[dinhHienTai]);
+
+            // Sắp xếp ngược để khớp với yêu cầu
+            sort(danhSachKe[dinhHienTai].rbegin(), danhSachKe[dinhHienTai].rend());
+
+            for (int dinhKe : danhSachKe[dinhHienTai]) {
+                if (!daTham[dinhKe]) {
+                    daTham[dinhKe] = true;
+                    hangDoi.push(dinhKe);
+                }
+            }
+        }
+
+        return ketQua;
+    }
+};
+
+int main() {
+    DoThi doThi(11);
+
+    doThi.datTenDinh(0, "Ha Noi");
+    doThi.datTenDinh(1, "Hai Duong");
+    doThi.datTenDinh(2, "Hai Phong");
+    doThi.datTenDinh(3, "Uong Bi");
+    doThi.datTenDinh(4, "Bac Giang");
+    doThi.datTenDinh(5, "Bac Ninh");
+    doThi.datTenDinh(6, "Thai Nguyen");
+    doThi.datTenDinh(7, "Son Tay");
+    doThi.datTenDinh(8, "Hoa Binh");
+    doThi.datTenDinh(9, "Phu Ly");
+    doThi.datTenDinh(10, "Hung Yen");
+
+    doThi.themCanh(0, 1);
+    doThi.themCanh(0, 5);
+    doThi.themCanh(0, 6);
+    doThi.themCanh(0, 7);
+    doThi.themCanh(0, 8);
+    doThi.themCanh(0, 9);
+    doThi.themCanh(1, 2);
+    doThi.themCanh(1, 10);
+    doThi.themCanh(2, 3);
+    doThi.themCanh(3, 5);
+    doThi.themCanh(3, 4);
+    doThi.themCanh(9, 10);
+
+    doThi.hienThi();
+
+    vector<string> ketQuaDuyet = doThi.duyetRong(0);
+    cout << "Duyet do thi theo chieu rong - BFS: " << endl;
+    cout << "    ";
+    for (const string& tenDiaDanh : ketQuaDuyet)
+        cout << tenDiaDanh << " --> ";
+    cout << "END" << endl;
+    
+    return 0;
+}
