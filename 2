@@ -1,0 +1,133 @@
+#include <iostream>
+#include <queue>
+using namespace std;
+
+class DoThi {
+private:
+    int soDinh;
+    int** maTranKe;
+    string* tenDinh;
+
+public:
+    DoThi(int soLuongDinh) {
+        soDinh = soLuongDinh;
+
+        maTranKe = new int*[soDinh];
+        for (int i = 0; i < soLuongDinh; i++) {
+            maTranKe[i] = new int[soDinh];
+            for (int j = 0; j < soLuongDinh; j++) {
+                maTranKe[i][j] = 0;
+            }
+        }
+
+        tenDinh = new string[soDinh];
+    }
+
+    ~DoThi() {
+        for (int i = 0; i < soDinh; i++) 
+            delete[] maTranKe[i];
+        delete[] maTranKe;
+        delete[] tenDinh; 
+    }
+
+public:
+    void themCanh(int dinhX, int dinhY) {    
+        maTranKe[dinhX][dinhY] = 1;
+        maTranKe[dinhY][dinhX] = 1;
+    }
+
+    void ganTenDinh(int viTriDinh, string ten) {
+        tenDinh[viTriDinh] = ten;
+    }
+
+    void xoaCanh(int dinhX, int dinhY) {
+        maTranKe[dinhX][dinhY] = 0;
+        maTranKe[dinhY][dinhX] = 0;
+    }
+
+    void inMaTranKe() {
+        cout << "Ma tran dinh ke bieu dien do thi vo huong (" << soDinh << "x" << soDinh << "):" << endl;
+        for (int i = 0; i < soDinh; i++) {
+            cout << "    ";
+            for (int j = 0; j < soDinh; j++) {
+                cout << maTranKe[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+
+public:
+    string* duyetBFS(int dinhBatDau = 0) {
+        bool* daTham = new bool[soDinh];
+        for (int i = 0; i < soDinh; i++)
+            daTham[i] = false;
+
+        string* ketQua = new string[soDinh];
+        queue<int> hangDoi;
+        int dem = 0;
+
+        daTham[dinhBatDau] = true;
+        hangDoi.push(dinhBatDau);
+
+        while (!hangDoi.empty()) {
+            int dinhHienTai = hangDoi.front();
+            hangDoi.pop();
+            ketQua[dem++] = tenDinh[dinhHienTai];
+
+            for (int dinhKe = soDinh - 1; dinhKe >= 0; dinhKe--) {
+                if (maTranKe[dinhHienTai][dinhKe] != 0 && !daTham[dinhKe]) {
+                    daTham[dinhKe] = true;
+                    hangDoi.push(dinhKe);
+                }
+            }
+        }
+
+        delete[] daTham;
+        return ketQua;
+    }
+
+    int laySoDinh() {
+        return soDinh;
+    }
+};
+
+int main() {
+    DoThi doThi(11);
+
+    doThi.ganTenDinh(0, "Ha Noi");
+    doThi.ganTenDinh(1, "Hai Duong");
+    doThi.ganTenDinh(2, "Hai Phong");
+    doThi.ganTenDinh(3, "Uong Bi");
+    doThi.ganTenDinh(4, "Bac Giang");
+    doThi.ganTenDinh(5, "Bac Ninh");
+    doThi.ganTenDinh(6, "Thai Nguyen");
+    doThi.ganTenDinh(7, "Son Tay");
+    doThi.ganTenDinh(8, "Hoa Binh");
+    doThi.ganTenDinh(9, "Phu Ly");
+    doThi.ganTenDinh(10, "Hung Yen");
+
+    doThi.themCanh(0, 1);
+    doThi.themCanh(0, 5);
+    doThi.themCanh(0, 6);
+    doThi.themCanh(0, 7);
+    doThi.themCanh(0, 8);
+    doThi.themCanh(0, 9);
+    doThi.themCanh(1, 2);
+    doThi.themCanh(1, 10);
+    doThi.themCanh(2, 3);
+    doThi.themCanh(3, 5);
+    doThi.themCanh(3, 4);
+    doThi.themCanh(9, 10);
+
+    doThi.inMaTranKe();
+
+    string* ketQuaBFS = doThi.duyetBFS(0);
+    cout << "Duyet do thi theo chieu rong - BFS: " << endl;
+    cout << "    ";
+    for (int i = 0; i < doThi.laySoDinh(); i++)
+        cout << ketQuaBFS[i] << " --> ";
+    cout << "END" << endl;
+
+    delete[] ketQuaBFS;
+    return 0;
+}
